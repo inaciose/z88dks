@@ -15,4 +15,19 @@ __asm
     pop     bc
     pop     hl
 __endasm;
-} 
+}
+
+int fgetc_cons() __naked
+{
+__asm
+    push    bc
+    push    af
+    ld      c, 01h
+    rst     30h
+    ld      l,a     ;Return the result in hl
+    ld      h,0
+    pop     af
+    pop     bc
+
+__endasm;
+}

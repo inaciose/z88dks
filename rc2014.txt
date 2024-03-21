@@ -1,0 +1,54 @@
+# RC2014 informations
+
+Basic Usage
+A command line for compiling a C file or .lst file containing a simple list of mixed C and asm files can look complicated, but really it is pretty straight forward.
+
+1 - Use a Makefile.
+
+Makefile
+--
+all:
+	zcc +rc2014 -subtype=basic -clib=sdcc_iy -o test.o test.c -SO3 -v -m -list -pragma-define:CRT_ORG_CODE=0x8500 -create-app
+
+clean:
+	rm -f test_DATA.bin test_BSS.bin test_CODE.bin test.map test.bin test.o test.hex test.ihx
+
+--
+
+2 - Change to the project folder
+
+cd folder
+
+3a - Compile using docker. run:
+
+docker run -v ${PWD}:/src/ -it z88dk/z88dk make
+
+(or build a file make.sh with that command (and any other we need), and just do: sh make.sh)
+
+3b - Compile using an install from source
+
+make
+
+# Webs Sample im based on
+- zcc +rc2014 -subtype=basic -clib=sdcc_iy -SO3 -v -m --list --c-code-in-asm --fverbose-asm --max-allocs-per-node100000 --math32 -llib/hbios/time -llib/hbios/diskio_hbios -llib/hbios/ff @mytest.lst -o mytest -create-app
+
+Legend
+zcc is the preprocessor, and is always used. Calls to the individual compilers, assembler, linker, and packager are not typical.
++rc2014 is the target. Unless you're preferring the CP/M +cpm or HBIOS +hbios targets, you should always use this +rc2014 target.
+-subtype=basic is the subtype, as described below. If it is missing, a default subtype will be selected.
+-clib=sdcc_iy is the compiler and library choice (sdcc_iy is the default and can be ommited). If you prefer to use z88dk-sccz80 compiler then use -clib=new.
+-SO3 is the optimisation. Unless you're debugging the compiler, always use this maximum optimisation setting.
+-v is verbose. -vn is silent compilation.
+-m produces a map file. This is very useful to see where each label and section is located in memory.
+-w produces a warning if CODE, DATA, or BSS sections overlap (default).
+--list produces an assembly listing of the C files and the crt.
+--c-code-in-asm includes C comments in the assembly listing. This is useful to track specifically what assembly is being generated from your C. Often simple adjustments to your C can substantially improve the generated assembly. Don't use this for your final build, as some peephole optimisations will be affected by comments interspersed within the assembly files.
+--fverbose-asm produces verbose assembly listings when --list is added. Don't use this for your final build, as some peephole optimisations will be affected by comments interspersed within the assembly files.
+--max-allocs-per-node100000 defines how aggressively the z88dk-zsdcc compiler should attempt to optimise the code. Typical values range from 3000 to 400000. Increasing the value produces better code, but the compilation time can become excessive.
+--math32 use the IEEE math32 library. The traditional math48 library is linked by -lm. The APU Module library is --am9511.
+-llib/target/library links a specific 3rd party library.
+@mytest.lst is a file containing a simple list of C and assembly programs to be compiled and linked into one outcome. If you have only one C file myfile.c is then the form used instead.
+-o test specifies the root of the output files. test_CODE, test_DATA, and test_UNASSIGNED should be generated. test_UNASSIGNED should have 0 bytes content; there should be nothing unassigned.
+-create-app calls upon z88dk-appmake to produce the final binary and Intel HEX files required to upload to the RC2014.
+
+https://github-wiki-see.page/m/RC2014Z80/RC2014/wiki/Using-Z88DK

@@ -2,7 +2,11 @@
 
 int main()
 {
-   printf("Hello World !\n");
-       return 0;
+    printf("Hello World !\n");
+    while ( 1 ) {
+        int c = getchar();
+        printf("<%c>=%d ", c,c);
+    }
+    return 0;
 }
 

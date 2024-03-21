@@ -8,3 +8,7 @@ To build using z88dk on docker, do the following steps:
 -- exemples
 docker run -v ${PWD}:/src/ -it z88dk/z88dk make
 docker run -v ${PWD}:/src/ -it z88dk/z88dk zcc +zx -vn test.c -o test.bin -lndos 
+
+# build classic homebrew for rc2014
+following the instructions at:
+https://github.com/z88dk/z88dk/wiki/Classic--Homebrew
