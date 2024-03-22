@@ -22,4 +22,5 @@ notes
 test is a 1st sample
 rc2014f
 
-
+# minicom, enable colors 
+sudo minicom -c on --device /dev/ttyUSB0
