@@ -28,4 +28,11 @@
 #define ANSIQ_CUR_INVISIBLE    ANSIQ_ESC "[?25l"
 #define ANSIQ_CUR_VISIBLE      ANSIQ_ESC "[?25h"
 
+/*
+void cursor(int l, int c)
+{
+    printf("%c[%d;%df",0x1B,l,c);
+}
+*/
+
 #endif /* ANSIQ_CURSOR_H */
