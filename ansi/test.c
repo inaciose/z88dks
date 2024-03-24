@@ -8,7 +8,8 @@ int main(void){
     printf(ANSIQ_SCR_CLR_ALL ANSIQ_CUR_HOME);
 
     // ANSIQ_SETBG_RGB(r, g, b)
-    printf(ANSIQ_SETBG_RGB(0, 0, 0));
+    //printf(ANSIQ_SETBG_RGB(0, 0, 0));
+    //printf(ANSIQ_SETBG_GREEN);
 
     printf(ANSIQ_SETFG_GREEN"Hello, world!"ANSIQ_GR_RESET"\n");
 
@@ -38,6 +39,7 @@ int main(void){
     printf(ANSIQ_CUR_DOWN(1) "X");
     printf(ANSIQ_CUR_DOWN(1) "X");
     printf(ANSIQ_CUR_RIGHT(1) "X");
+    printf(ANSIQ_SETBG_BLUE);
     printf(ANSIQ_CUR_DOWN(1) "X");
     printf(ANSIQ_CUR_DOWN(1) "X");
     printf(ANSIQ_CUR_DOWN(1) "X");
