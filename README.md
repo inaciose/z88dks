@@ -17,10 +17,10 @@ docker run -v ${PWD}:/src/ -it z88dk/z88dk zcc +zx -vn test.c -o test.bin -lndos
 -- Using Makefiles its easier, because the command its allways:
 docker run -v ${PWD}:/src/ -it z88dk/z88dk make
 
-notes
-
-test is a 1st sample
-rc2014f
+# notes
+- mixasmc_: passing arguments btw C and asm
+- ansi lib: colors, cursor & screen (usable on rc2014)
+- rc2014scmapi: SCM api calls for C as functions using ZD88k
 
 # minicom, enable colors 
 sudo minicom -c on --device /dev/ttyUSB0
