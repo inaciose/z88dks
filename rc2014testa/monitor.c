@@ -4,13 +4,20 @@
 int fgetc_cons() __naked
 {
 __asm
-    push    bc
+    push af
+    push bc;
+    push de
+
     ld      c, 0x01
     rst     0x30
-    ld      l,a     ;Return the result in hl
-    ld      h,0
-    pop     bc
+    ld      l,a     ; return the 
+    ld      h,0     ; result in hl
 
+    pop de
+    pop bc
+    pop af
+
+    ret
 __endasm;
 }
 
@@ -18,18 +25,21 @@ __endasm;
 int fputc_cons_native(char c) __naked
 {
 __asm
-    pop     bc  ;return address
-    pop     hl  ;character to print in l
-    push    hl
-    push    bc
-    ld      a,l
-    push    hl
-    push    bc
-    ld      c, 0x02
-    rst     0x30
-    pop     bc
-    pop     hl
+    ld hl,2                 ; skip over return
+    add hl,sp               ; address on stack
+
+    push af
+    push bc;
+    push de
+
+    ld a,(hl)
+    ld c, 0x02
+    rst 0x30
+    
+    pop de
+    pop bc
+    pop af
+
+    ret
 __endasm;
-
 }
-
