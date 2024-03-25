@@ -3,6 +3,15 @@
 #include "ansiq_cursor.h"
 #include "ansiq_graphics.h"
 
+// 
+// function gotoxy(x,y)
+// copy it to required file
+//
+void ansicursor(int l, int c)
+{
+    printf("%c[%d;%df",0x1B,l,c);
+}
+
 int main(void){
     // clear all and go home
     printf(ANSIQ_SCR_CLR_ALL ANSIQ_CUR_HOME);
