@@ -40,6 +40,7 @@ int idx = 0;
 char text[TEXT_MAXLEN] = {0};
 char line[LINE_MAXLEN] = {0};
 
+extern void ztgsdcard_load(char *s, int start);
 extern void ztgsdcard_save(char *s, int start, int len);
 
 void setup(void);
@@ -79,14 +80,21 @@ void newFile(void) {
 }
 
 void loadFile(void) {
-    printf("Loading a file...\n");
-    // Add your code here to handle loading a file
+    char fnstr[13] = {0};
+    ansicursor(2, 1);
+    printf("Load file: ");
+    scanf("%12s", fnstr);
+    newFile();
+    ztgsdcard_load(fnstr, (int)&idx);
 }
 
 void saveFile(void) {
-    printf("Saving the file...\n");
-    // Add your code here to handle saving the file
-    ztgsdcard_save("notefile.txt\0", (int)text, idx);
+    char fnstr[13] = {0};
+    ansicursor(2, 1);
+    printf("save to file: ");
+    scanf("%12s", fnstr);
+    //ztgsdcard_save(fnstr, (int)text, idx);
+    ztgsdcard_save(fnstr, (int)&idx, idx + 2);
 }
 
 void closeFile(void) {
@@ -143,7 +151,7 @@ int getchoice(void) {
 void printlincol(int l, int c) {
     ansicursor(1, 84);
     printf("%d, %d", l, c);
-    printf(" | %x, %x", text, idx);
+    printf(" | %x %x, %x", &idx, text, idx);
     ansicursor(l, c);
 }
 

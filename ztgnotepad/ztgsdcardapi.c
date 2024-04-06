@@ -1,17 +1,128 @@
 #include <stdio.h>
 
 /////////////////////////////////////////////////////
-// API function $06, output line
+// save file to sd card
 //
-// Parameters: DE = Start of line in memory
+// Parameters: passed on stack
 // Returns: none
 //
-// args: one int arg
-// ret: none (l, hl, dehl)
-// arg in the stack. 
-// first 2 bytes allways hold the return address
-// next 2 byte are the argument (int = 16bit)
+// arg in the stack.
 // LSB first
+// first 2 bytes allways hold the return address
+// next 2 byte are the filename pointer (int = 16bit)
+// next 2 byte are the start address (int = 16bit)
+// next 2 byte are the len (int = 16bit)
+
+/////////////////////////////////////////////////////
+// save file to sd card
+//
+// Parameters: passed on stack
+// Returns: none
+//
+// arg in the stack.
+// LSB first
+// first 2 bytes allways hold the return address
+// next 2 byte are the filename pointer (int = 16bit)
+// next 2 byte are the start address (int = 16bit)
+// next 2 byte are the len (int = 16bit)
+
+void ztgsdcard_load(char *s, int start) __naked
+{
+
+   #asm
+
+    ld hl,2                 ; skip over return 
+    add hl,sp               ; address on stack
+
+    push af
+    push bc;
+    push de
+
+    // get filename s*
+    ; LSB first (16bit)
+    ld e,(hl)
+    inc hl
+    ld d,(hl)
+
+    push hl
+
+    // store filename in memory exchange position
+    ld hl, 0xfaf4 ; FNAME dest start address
+    
+    LFNL:
+    ld a, (de)
+    or 0
+    jr z, LFS
+    ld (hl), a
+    inc hl
+    inc de
+    jr LFNL
+
+    LFS:
+    // filename stored 
+    // add string terminator
+    ld (hl), 0
+
+    // advance to start address
+    // point to the first LSB on stack
+    pop hl
+    inc hl
+
+    // get start var
+    ld e,(hl)
+    inc hl
+    ld d,(hl)
+
+    // debug
+    // display start 2 bytes
+    push de
+    ld a, d
+    call NUM2HEX
+    ld a, d
+    call OUTC
+    ld a, e
+    call OUTC
+    pop de
+
+    push de
+    ld a, e
+    call NUM2HEX
+    ld a, d
+    call OUTC
+    ld a, e
+    call OUTC
+    pop de
+
+    ld a, '\n'
+    call OUTC
+
+    ld a, '\r'
+    call OUTC
+    // end display
+
+    push hl
+
+    // store it
+    ld hl, 0xfae0 ; FSTART dest start address
+    ld (hl), d
+    inc hl
+    ld (hl), e
+
+    pop hl
+
+    // call the load rom routine
+    push hl
+    call 0x2225
+    pop hl
+
+    pop de
+    pop bc
+    pop af
+
+    ret
+   
+    #endasm
+}
 
 void ztgsdcard_save(char *s, int start, int len) __naked
 {
@@ -60,6 +171,7 @@ void ztgsdcard_save(char *s, int start, int len) __naked
     inc hl
     ld d,(hl)
 
+    // debug
     // display start 2 bytes
     push de
     ld a, d
@@ -106,6 +218,7 @@ void ztgsdcard_save(char *s, int start, int len) __naked
     inc hl
     ld d,(hl)    
 
+    // debug
     // display len 2 bytes
     push de
     ld a, d
@@ -142,6 +255,7 @@ void ztgsdcard_save(char *s, int start, int len) __naked
    
     pop hl
 
+    // call the save rom routine
     push hl
     call 0x2182
     pop hl
@@ -152,7 +266,9 @@ void ztgsdcard_save(char *s, int start, int len) __naked
 
     ret
 
-    ;
+    //
+    // debug code
+    //
 
     NUM2HEX:
     ; input on a
@@ -179,7 +295,10 @@ void ztgsdcard_save(char *s, int start, int len) __naked
     adc a, 0x40 ; Ascii hex at this point (0 to F)   
     ret     
 
-    ;
+    //
+    // debug code
+    //
+
     OUTC:
     push hl
     push af
@@ -195,7 +314,6 @@ void ztgsdcard_save(char *s, int start, int len) __naked
     pop hl
 
     ret
-
 
     #endasm
 }
