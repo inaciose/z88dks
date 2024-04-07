@@ -40,7 +40,7 @@ int idx = 0;
 char text[TEXT_MAXLEN] = {0};
 char line[LINE_MAXLEN] = {0};
 
-extern void ztgsdcard_load(char *s, int start);
+extern int ztgsdcard_load(char *s, int start);
 extern void ztgsdcard_save(char *s, int start, int len);
 
 void setup(void);
@@ -85,7 +85,8 @@ void loadFile(void) {
     printf("Load file: ");
     scanf("%12s", fnstr);
     newFile();
-    ztgsdcard_load(fnstr, (int)&idx);
+    idx = ztgsdcard_load(fnstr, (int)text);
+    //ztgsdcard_load(fnstr, (int)&idx);
 }
 
 void saveFile(void) {
@@ -93,8 +94,8 @@ void saveFile(void) {
     ansicursor(2, 1);
     printf("save to file: ");
     scanf("%12s", fnstr);
-    //ztgsdcard_save(fnstr, (int)text, idx);
-    ztgsdcard_save(fnstr, (int)&idx, idx + 2);
+    ztgsdcard_save(fnstr, (int)text, idx);
+    //ztgsdcard_save(fnstr, (int)&idx, idx + 2);
 }
 
 void closeFile(void) {
