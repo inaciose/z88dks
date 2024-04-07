@@ -80,13 +80,23 @@ void newFile(void) {
 }
 
 void loadFile(void) {
+
+    //char *ptr = text;
     char fnstr[13] = {0};
+    int f;
+
     ansicursor(2, 1);
     printf("Load file: ");
     scanf("%12s", fnstr);
     newFile();
+
     idx = ztgsdcard_load(fnstr, (int)text);
-    //ztgsdcard_load(fnstr, (int)&idx);
+
+    ansicursor(lin+20, col);
+    for(f=0; f < idx; f++) {
+        putchar(*(text + f));
+    }
+    ansicursor(3, 1);
 }
 
 void saveFile(void) {
@@ -95,7 +105,6 @@ void saveFile(void) {
     printf("save to file: ");
     scanf("%12s", fnstr);
     ztgsdcard_save(fnstr, (int)text, idx);
-    //ztgsdcard_save(fnstr, (int)&idx, idx + 2);
 }
 
 void closeFile(void) {

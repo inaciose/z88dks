@@ -113,8 +113,8 @@ int ztgsdcard_load(char *s, int start) __naked
 
     // call the load rom routine
     push hl
-    //call 0x2225
-    call 0x8225 
+    call 0x2225
+    //call 0x8225 
     pop hl
 
     // get bytes loaded
@@ -268,8 +268,8 @@ void ztgsdcard_save(char *s, int start, int len) __naked
 
     // call the save rom routine
     push hl
-    //call 0x2182
-    call 0x8182
+    call 0x2182
+    //call 0x8182
     pop hl
 
     pop de
