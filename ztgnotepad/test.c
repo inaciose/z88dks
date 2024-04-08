@@ -32,8 +32,10 @@
 #define LINE_MAXLEN MAXCOL
 #define TEXT_MAXLEN 1024
 
+#define DEFAULT_LIN 7
 
-int lin = 1;
+
+int lin = DEFAULT_LIN;
 int col = 1;
 int idx = 0;
 
@@ -43,9 +45,13 @@ char line[LINE_MAXLEN] = {0};
 extern int ztgsdcard_load(char *s, int start);
 extern void ztgsdcard_save(char *s, int start, int len);
 
+void ansicursor(int l, int c);
 void setup(void);
 void menuprint(int l, int c);
-
+void printlincol(int l, int c);
+void newFile(void);
+void loadFile(void);
+void saveFile(void);
 
 void ansicursor(int l, int c)
 {
@@ -55,9 +61,25 @@ void ansicursor(int l, int c)
 void setup(void) {
         printf(ANSIQ_SCR_CLR_ALL ANSIQ_CUR_HOME);
         menuprint(1, 1);
-        lin = 3;
+        lin = DEFAULT_LIN;
         col = 1;
         ansicursor(lin, col);
+}
+
+void menuprint(int l, int c) {
+    ansicursor(l, c);
+    printf(NAME_COLOR "Notepad " DEFAULT_COLOR " | Menu: " NAME_COLOR "\\m");
+    printf(DEFAULT_COLOR " | " MENU_COLOR1 "1. New ");
+    printf(DEFAULT_COLOR " | " MENU_COLOR1 "2. Load ");
+    printf(DEFAULT_COLOR " | " MENU_COLOR1 "3. Save ");
+    printf(DEFAULT_COLOR " | " MENU_COLOR1 "0. Exit "DEFAULT_COLOR);
+    printf(ANSIQ_GR_RESET);
+}
+
+void printlincol(int l, int c) {
+    ansicursor(l, c);
+    printf(" | %x, %x", text, idx);
+    ansicursor(lin, col);
 }
 
 void newFile(void) {
@@ -80,137 +102,109 @@ void newFile(void) {
 }
 
 void loadFile(void) {
-
-    //char *ptr = text;
     char fnstr[13] = {0};
     int f;
 
     ansicursor(2, 1);
     printf("Load file: ");
+    
     scanf("%12s", fnstr);
-    newFile();
+    //fgets(fnstr, 12, stdin);
 
+    newFile();
     idx = ztgsdcard_load(fnstr, (int)text);
 
-    ansicursor(lin+20, col);
+    ansicursor(lin+5, col);
     for(f=0; f < idx; f++) {
         putchar(*(text + f));
     }
-    ansicursor(3, 1);
+    ansicursor(lin, col);
 }
 
 void saveFile(void) {
     char fnstr[13] = {0};
+    
     ansicursor(2, 1);
     printf("save to file: ");
+
     scanf("%12s", fnstr);
+    //fgets(fnstr, 12, stdin);
+
     ztgsdcard_save(fnstr, (int)text, idx);
+    ansicursor(lin, col);
 }
 
-void closeFile(void) {
-    printf("Closing the file...\n");
-    // Add your code here to handle closing the file
-}
-
-void menuprint(int l, int c) {
-    ansicursor(l, c);
-    printf(NAME_COLOR "Notepad Menu");
-    printf(DEFAULT_COLOR " | " MENU_COLOR1 "1. New ");
-    printf(DEFAULT_COLOR " | " MENU_COLOR1 "2. Load ");
-    printf(DEFAULT_COLOR " | " MENU_COLOR1 "3. Save ");
-    //printf(DEFAULT_COLOR " | " MENU_COLOR1 "4. Close ");
-    printf(DEFAULT_COLOR " | " MENU_COLOR1 "5. Exit "DEFAULT_COLOR " | ");
-    printf(ANSIQ_GR_RESET);
-
-}
-
-int getchoice(void) {
-    int choice;
-
-    menuprint(1, 1);
-    printf("Enter your choice: ");
-    scanf("%d", &choice);
-
-    switch (choice) {
-        case 1:
-            newFile();
-            break;
-        case 2:
-            loadFile();
-            break;
-        case 3:
-            saveFile();
-            break;
-        case 4:
-            closeFile();
-            break;
-        case 5:
-            printf("Exiting the program...\n");
-            break;
-        default:
-            printf("Invalid choice. Please try again.\n");
-            break;
-    }
-    
-    printf("\n");
-
-
-    return choice;
-}
-
-void printlincol(int l, int c) {
-    ansicursor(1, 84);
-    printf("%d, %d", l, c);
-    printf(" | %x %x, %x", &idx, text, idx);
-    ansicursor(l, c);
-}
 
 
 int main(void) {
-    int choice = 0;
+    int choice = 10;
     int linelen = 0;
     int f;
 
     char c;
 
-    char *ptr = text;
-
     setup();
     idx = 0;
     
     do {
-        printlincol(lin, col);
+        printlincol(1, 80);
 
-        scanf("%80s", &line);
+        //scanf("%80[^\n]s", &line);
+        fgets(line, LINE_MAXLEN - 1, stdin);
 
         // check for commands
         f = 0;
         if(line[0] == '\\'){
             if(line[1] == 'm') {
-                choice = getchoice();
-                continue;
+                //choice = getchoice();
+                //continue;
+                if(line[2] == '0') {
+                    choice = 0;
+                    setup();
+                    printf("Exiting the program...\n");
+                    break;
+
+                }
+                if(line[2] == '1') {
+                    newFile();
+                    continue;
+                }            
+                if(line[2] == '2') {
+                    loadFile();
+                    continue;
+                }            
+                if(line[2] == '3') {
+                    saveFile();
+                    continue;
+                }            
             }
         }
 
         // add to text
         f = 0;
-        while(line[f] != 0) {
+        while(line[f] != '\n') {
             text[idx++] = line[f++];
+            linelen++;
         }
+        text[idx++] = '\n';
         text[idx++] = 0;
 
-        lin++;
-        col=0;
+        ansicursor(lin, col);
 
-        ansicursor(lin+20, col);
+        for (f=0; f < LINE_MAXLEN; f++) {
+            putchar(' ');
+        }
+
+        // show text bellow
+        ansicursor(lin+5, col);
         for(f=0; f < idx; f++) {
-            putchar(*(ptr + f));
+            putchar(*(text + f));
         }
 
         ansicursor(lin, col);
 
 
-    } while (choice != 5);
+    } while (choice != 0);
     
     return 0;
 }

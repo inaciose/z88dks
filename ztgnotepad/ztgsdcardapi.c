@@ -46,8 +46,9 @@ int ztgsdcard_load(char *s, int start) __naked
     push hl
 
     // store filename in memory exchange position
-    //ld hl, 0xfaf4 ; FNAME dest start address
-    ld hl, 0xfaf6 ; FNAME dest start address
+    // TODO: HARDCODED FNAME dest start address
+    //ld hl, 0xfaf4
+    ld hl, 0xfaf6
     
     LFNL:
     ld a, (de)
@@ -73,6 +74,7 @@ int ztgsdcard_load(char *s, int start) __naked
     inc hl
     ld d,(hl)
 
+    /*
     // debug
     // display start 2 bytes
     push de
@@ -99,12 +101,14 @@ int ztgsdcard_load(char *s, int start) __naked
     ld a, '\r'
     call OUTC
     // end display
+    */
 
     push hl
 
     // store it
-    //ld hl, 0xfae0 ; FSTART dest start address
-    ld hl, 0xfae2 ; FSTART dest start address
+    // TODO: HARDCODED FSTART dest start address
+    //ld hl, 0xfae0
+    ld hl, 0xfae2
     ld (hl), d
     inc hl
     ld (hl), e
@@ -113,6 +117,7 @@ int ztgsdcard_load(char *s, int start) __naked
 
     // call the load rom routine
     push hl
+    // TODO hardcoded address
     call 0x2225
     //call 0x8225 
     pop hl
@@ -153,8 +158,9 @@ void ztgsdcard_save(char *s, int start, int len) __naked
     push hl
 
     // store filename in memory exchange position
-    //ld hl, 0xfaf4 ; FNAME dest start address
-    ld hl, 0xfaf6 ; FNAME dest start address
+    // TODO: HARDCODED FNAME dest start address
+    //ld hl, 0xfaf4
+    ld hl, 0xfaf6
     
     FNL:
     ld a, (de)
@@ -180,6 +186,7 @@ void ztgsdcard_save(char *s, int start, int len) __naked
     inc hl
     ld d,(hl)
 
+    /*
     // debug
     // display start 2 bytes
     push de
@@ -206,13 +213,14 @@ void ztgsdcard_save(char *s, int start, int len) __naked
     ld a, '\r'
     call OUTC
     // end display
-
+    */
 
     push hl
 
     // store it
-    //ld hl, 0xfae0 ; FSTART dest start address
-    ld hl, 0xfae2 ; FSTART dest start address
+    // TODO: HARDCODED FSTART dest start address
+    //ld hl, 0xfae0 
+    ld hl, 0xfae2
     ld (hl), d
     inc hl
     ld (hl), e
@@ -228,6 +236,7 @@ void ztgsdcard_save(char *s, int start, int len) __naked
     inc hl
     ld d,(hl)    
 
+    /*
     // debug
     // display len 2 bytes
     push de
@@ -254,12 +263,14 @@ void ztgsdcard_save(char *s, int start, int len) __naked
     ld a, '\r'
     call OUTC
     // end display
+    */
 
     push hl
 
     // store it
-    //ld hl, 0xfae2 ; FLEN dest start address
-    ld hl, 0xfae4 ; FLEN dest start address
+    // TODO: HARDCODED FLEN dest start address
+    //ld hl, 0xfae2
+    ld hl, 0xfae4
     ld (hl), d
     inc hl
     ld (hl), e
@@ -268,6 +279,7 @@ void ztgsdcard_save(char *s, int start, int len) __naked
 
     // call the save rom routine
     push hl
+    // TODO hardcoded address
     call 0x2182
     //call 0x8182
     pop hl
@@ -278,6 +290,7 @@ void ztgsdcard_save(char *s, int start, int len) __naked
 
     ret
 
+    /*
     //
     // debug code
     //
@@ -326,6 +339,7 @@ void ztgsdcard_save(char *s, int start, int len) __naked
     pop hl
 
     ret
+    */
 
     #endasm
 }
