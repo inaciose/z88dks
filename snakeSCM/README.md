@@ -1,4 +1,4 @@
-# snake conversion to serial/uaart terminal only
+# snake conversion to serial/uart terminal only
 https://github.com/RC2014Z80/RC2014/tree/master/ROMs/snake
 
 # status
