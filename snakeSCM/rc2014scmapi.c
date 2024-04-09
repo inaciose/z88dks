@@ -15,7 +15,7 @@
 //
 // args: no argument
 // ret: l
-/*
+
 char scm_getc(void) __naked
 {
     #asm
@@ -38,6 +38,7 @@ char scm_getc(void) __naked
     #endasm
 }
 
+/*
 /////////////////////////////////////////////////////
 // API function $02, output character
 //
@@ -73,7 +74,6 @@ void scm_putc(char c) __naked
 
     #endasm
 }
-
 */
 
 /////////////////////////////////////////////////////
@@ -83,9 +83,9 @@ void scm_putc(char c) __naked
 // Returns: NZ flagged if an input character is available from the console
 //
 // args: no argument
-// ret: l (0= not available / 1 = is available)
+// ret: l (0= not available / char code that is available)
 
-char scm_aget(void) __naked
+char scm_agetc(void) __naked
 {
     #asm
 
@@ -98,7 +98,7 @@ char scm_aget(void) __naked
 
     jr z, aget_noa
     ; is available
-    ld      l,1
+    ld      l,a
     jr aget_end
 
     aget_noa:
@@ -160,6 +160,7 @@ void scm_printline(char *s) __naked
 }
 */
 
+/*
 /////////////////////////////////////////////////////
 // API function $0A, delay
 //
@@ -200,6 +201,7 @@ void scm_delay(int ms) __naked
 
     #endasm
 }
+*/
 
 /*
 /////////////////////////////////////////////////////

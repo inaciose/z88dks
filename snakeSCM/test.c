@@ -3,10 +3,8 @@
 #include "ansiq_cursor.h"
 #include "ansiq_graphics.h"
 
-extern char scm_aget(void);
-extern void scm_delay(int ms);
-//extern int scm_freetop(void);
-//extern void scm_setfreetop(int top);
+extern char scm_agetc(void);
+extern char scm_getc(void);
 
 unsigned int xorshift128(void);
 void new_apple(void);
@@ -59,10 +57,18 @@ int main(void){
 
     initialize();
 
-    // pseudo run
+    // pseudo random
     while (getchar() != 'n')
         rnd_x++;
 
+    /*
+    while (scm_agetc() != 'n')
+    {
+        scm_getc();
+        rnd_x++;
+    }
+    scm_getc();
+    */
 
     while (run)
     {
@@ -71,8 +77,8 @@ int main(void){
             ansicursor(FIELD_H / 2, FIELD_W / 2 - 5);
             printf("GAME OVER!");
             
-            // wait command for new game
-            while (getchar() != 'n') ;
+            // wait command for new game           
+            while (scm_getc() != 'n') ;
             initialize();
             continue;
         }
@@ -80,9 +86,9 @@ int main(void){
         usercommand = 0; // none
         //usercommand = rc2014_inp(0x01);
 
-        if (scm_aget())
+        if (scm_agetc())
         {
-            usercommand = getchar();
+            usercommand = scm_getc();
         }
 
         head_idx = snake_head.i * FIELD_W + snake_head.j;
@@ -96,15 +102,15 @@ int main(void){
                     field[head_idx] = 'U';
                 break;
 
-            case 'd':
-            case 'D':
+            case 'o':
+            case 'O':
             case 8:
                 if (field[head_idx] != 'L')
                     field[head_idx] = 'R';
                 break;
 
-            case 'a':
-            case 'A':
+            case 'i':
+            case 'I':
             case 4:
                 if (field[head_idx] != 'R')
                     field[head_idx] = 'L';
@@ -125,7 +131,7 @@ int main(void){
             case 'p':
             case 'P':
                 while (1)
-                  if (scm_aget() && getchar() == 'p')
+                  if (scm_agetc() && scm_getc() == 'p')
                       break;
                 break;
 
@@ -148,8 +154,7 @@ int main(void){
 #asm
         push af
         push bc
-        ;ld BC, 0x5000 ;@ ~0.5 sec loop
-        ld BC, 0xF000 ;@ wtf
+        ld BC, 0x5000 ;@ ~0.5 sec loop
 DELY:   NOP
         DEC BC
         LD A,B
@@ -302,12 +307,13 @@ void initialize(void)
     printf(SNAKE_COLOR);
     printf("  *RC2014 SNAKE*  ");
     printf(BG_COLOR);
-    printf("2024, based on work of F. B. 2016");
+    printf("XSI 2024 based on work of F. B. 2016");
     ansicursor(FIELD_H + 2, 1);    
-    printf("w:up, s:down, a:left, d:right, n:new game, p:pause, x:exit");
-    ansicursor(FIELD_H + 1, 50);
-
+    printf("w:up, s:down, i:left, o:right, n:new game, p:pause, x:exit");
+    ansicursor(FIELD_H + 1, 60);
+    printf(APPLE_COLOR);
     update_score();
+    printf(BG_COLOR);
 }
 
 //
@@ -348,7 +354,7 @@ int update_snake(void)
         keepsize = 0;
         score += SCORE_PER_APPLE;
         printf(BG_COLOR);
-        ansicursor(FIELD_H + 1, 50);
+        ansicursor(FIELD_H + 1, 60);
         update_score();
     }
     else
