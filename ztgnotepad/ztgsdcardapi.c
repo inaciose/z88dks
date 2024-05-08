@@ -1,17 +1,46 @@
 #include <stdio.h>
+/////////////////////////////////////////////////////
+//
+// ZTdos system calls api
+//
+/////////////////////////////////////////////////////
+//
+// Define ztdos api calls addresses
+//
+#define ZTC_FSAVE 0x2002
+#define ZTC_FLOAD 0x2005
+
+#define ZTC_FDEL    0x2008
+#define ZTC_SLIST   0x200b
+#define ZTC_CLIST   0x200e
+#define ZTC_FREN    0x2011
+#define ZTC_FCOPY   0x2014
+
 
 /////////////////////////////////////////////////////
-// save file to sd card
 //
-// Parameters: passed on stack
-// Returns: none
+// Define ztdos api input args addresses
 //
-// arg in the stack.
-// LSB first
-// first 2 bytes allways hold the return address
-// next 2 byte are the filename pointer (int = 16bit)
-// next 2 byte are the start address (int = 16bit)
-// next 2 byte are the len (int = 16bit)
+#define ZTI_START   0xfa00
+#define ZTI_LEN     0xfa02
+
+#define ZTI_NAME    0xfa04
+#define ZTI_NAME1   0xfa45
+
+#define ZTI_MODE    0xfa86
+#define ZTI_HDL     0xfa88
+
+/////////////////////////////////////////////////////
+//
+// Define ztdos api output results addresses
+//
+#define ZTO_ERROR   0xfa99
+#define ZTO_BYTE    0xfa9a
+#define ZTO_BYTE1   0xfa9b
+#define ZTO_LONG    0xfa9c
+
+#define ZTO_NBYTES  0xfaa0
+#define ZTO_BUFFER  0xfaa2
 
 /////////////////////////////////////////////////////
 // load file to sd card
@@ -88,7 +117,8 @@ int ztgsdcard_load(char *s, int start) __naked
     // TODO: HARDCODED FNAME dest start address
     //ld hl, 0xfaf4
     //ld hl, 0xfaf6
-    ld hl, 0xfa04
+    //ld hl, 0xfa04
+    ld hl, ZTI_NAME
     
     LFNL:
     ld a, (de)
@@ -109,7 +139,7 @@ int ztgsdcard_load(char *s, int start) __naked
     push de
     push bc
     push af
-    ld   de,0xfa04
+    ld   de,ZTI_NAME
     ld   C,0x06
     rst  0x30
     ld a, '\n'
@@ -166,7 +196,7 @@ int ztgsdcard_load(char *s, int start) __naked
     // TODO: HARDCODED FSTART dest start address
     //ld hl, 0xfae0
     //ld hl, 0xfae2
-    ld hl, 0xfa00
+    ld hl, ZTI_START
     ld (hl), d
     inc hl
     ld (hl), e
@@ -176,14 +206,50 @@ int ztgsdcard_load(char *s, int start) __naked
     // call the load rom routine
     push hl
     // TODO hardcoded address
-    call 0x2005
+    call ZTC_FLOAD
+    //call 0x2005
     //call 0x2225
     //call 0x8225 
     pop hl
 
+
+    // debug
+    ld hl, ZTO_NBYTES
+    ld d, (hl)
+    inc hl
+    ld e, (hl)
+
+    // debug
+    // display start 2 bytes
+    push de
+    ld a, d
+    call NUM2HEX
+    ld a, d
+    call OUTC
+    ld a, e
+    call OUTC
+    pop de
+
+    push de
+    ld a, e
+    call NUM2HEX
+    ld a, d
+    call OUTC
+    ld a, e
+    call OUTC
+    pop de
+
+    ld a, '\n'
+    call OUTC
+
+    ld a, '\r'
+    call OUTC
+    // end display
+
+
     // get bytes loaded
     //ld de, 0xfae0
-    ld de, 0xfaa0
+    ld de, ZTO_NBYTES
     ld h, (de)
     inc de
     ld l, (de)
@@ -196,6 +262,19 @@ int ztgsdcard_load(char *s, int start) __naked
    
     #endasm
 }
+
+/////////////////////////////////////////////////////
+// save file to sd card
+//
+// Parameters: passed on stack
+// Returns: none
+//
+// arg in the stack.
+// LSB first
+// first 2 bytes allways hold the return address
+// next 2 byte are the filename pointer (int = 16bit)
+// next 2 byte are the start address (int = 16bit)
+// next 2 byte are the len (int = 16bit)
 
 void ztgsdcard_save(char *s, int start, int len) __naked
 {
@@ -221,7 +300,8 @@ void ztgsdcard_save(char *s, int start, int len) __naked
     // TODO: HARDCODED FNAME dest start address
     //ld hl, 0xfaf4
     //ld hl, 0xfaf6
-    ld hl, 0xfa04
+    //ld hl, 0xfa04
+    ld hl, ZTI_NAME
     
     FNL:
     ld a, (de)
@@ -282,7 +362,7 @@ void ztgsdcard_save(char *s, int start, int len) __naked
     // TODO: HARDCODED FSTART dest start address
     //ld hl, 0xfae0 
     //ld hl, 0xfae2
-    ld hl, 0xfa00
+    ld hl, ZTI_START
     ld (hl), d
     inc hl
     ld (hl), e
@@ -333,7 +413,7 @@ void ztgsdcard_save(char *s, int start, int len) __naked
     // TODO: HARDCODED FLEN dest start address
     //ld hl, 0xfae2
     //ld hl, 0xfae4
-    ld hl, 0xfa02
+    ld hl, ZTI_LEN
     ld (hl), d
     inc hl
     ld (hl), e
@@ -343,7 +423,8 @@ void ztgsdcard_save(char *s, int start, int len) __naked
     // call the save rom routine
     push hl
     // TODO hardcoded address
-    call 0x2002
+    call ZTC_FSAVE
+    //call 0x2002
     //call 0x2182
     //call 0x8182
     pop hl
