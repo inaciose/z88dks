@@ -83,7 +83,7 @@ void scm_putc(char c) __naked
 // args: no argument
 // ret: l (0= not available / 1 = is available)
 
-char scm_aget(void) __naked
+char scm_agetc(void) __naked
 {
     #asm
 
@@ -96,7 +96,7 @@ char scm_aget(void) __naked
 
     jr z, aget_noa
     ; is available
-    ld      l,1
+    ld      l,a
     jr aget_end
 
     aget_noa:
