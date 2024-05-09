@@ -62,64 +62,32 @@ int ztgsdcard_load(char *s, int start) __naked
     ld hl,2                 ; skip over return 
     add hl,sp               ; address on stack
 
+    // store all the other
+    // register in the stack
     push af
     push bc;
     push de
 
-    // get filename s*
+    // get input filename *str
+    // load it to de register
     ; LSB first (16bit)
     ld e,(hl)
     inc hl
     ld d,(hl)
 
-
-    // debug
-    push hl
-    push de
-    push bc
-    push af
-    // debug
-    // display start 2 bytes
-    push de
-    ld a, d
-    call NUM2HEX
-    ld a, d
-    call OUTC
-    ld a, e
-    call OUTC
-    pop de
-
-    push de
-    ld a, e
-    call NUM2HEX
-    ld a, d
-    call OUTC
-    ld a, e
-    call OUTC
-    pop de
-
-    ld a, '\n'
-    call OUTC
-    ld a, '\r'
-    call OUTC
-    // end display
-    
-    // debug
-    pop af
-    pop bc
-    pop de
-    pop hl
-
-
+    // store hl (it have the next argumen address)
     push hl
 
-    // store filename in memory exchange position
-    // TODO: HARDCODED FNAME dest start address
-    //ld hl, 0xfaf4
-    //ld hl, 0xfaf6
-    //ld hl, 0xfa04
+    //
+    // store filename string in 
+    // required memory start address
+    //
+
+    // set destination address
+    // for the file name string
     ld hl, ZTI_NAME
     
+    // copy the sring from *de to *hl
     LFNL:
     ld a, (de)
     or 0
@@ -134,130 +102,61 @@ int ztgsdcard_load(char *s, int start) __naked
     // add string terminator
     ld (hl), 0
 
-    // debug
-    push hl
-    push de
-    push bc
-    push af
-    ld   de,ZTI_NAME
-    ld   C,0x06
-    rst  0x30
-    ld a, '\n'
-    call OUTC
-    ld a, '\r'
-    call OUTC
-    pop af
-    pop bc
-    pop de
-    pop hl
-
-    // advance to start address
+    // advance to START address
     // point to the first LSB on stack
     pop hl
     inc hl
 
-    // get start var
+    // get input START start address
+    // load it to de register
     ld e,(hl)
     inc hl
     ld d,(hl)
-
-    
-    // debug
-    // display start 2 bytes
-    push de
-    ld a, d
-    call NUM2HEX
-    ld a, d
-    call OUTC
-    ld a, e
-    call OUTC
-    pop de
-
-    push de
-    ld a, e
-    call NUM2HEX
-    ld a, d
-    call OUTC
-    ld a, e
-    call OUTC
-    pop de
-
-    ld a, '\n'
-    call OUTC
-
-    ld a, '\r'
-    call OUTC
-    // end display
-    
-
+        
+    // store hl (is required? no need to get any more arg from stack)
     push hl
 
-    // store it
-    // TODO: HARDCODED FSTART dest start address
-    //ld hl, 0xfae0
-    //ld hl, 0xfae2
+    //
+    // store start address START in
+    // required memory start address
+    //
+
+    // set destination address
+    // for the start address
     ld hl, ZTI_START
     ld (hl), d
     inc hl
     ld (hl), e
 
+    // (is required if close above push)
     pop hl
 
-    // call the load rom routine
+    // store hl (is required?)
     push hl
-    // TODO hardcoded address
+
+    // call the load routine (ROM)
     call ZTC_FLOAD
-    //call 0x2005
-    //call 0x2225
-    //call 0x8225 
+
+    // (is required if close above push)
     pop hl
 
-
-    // debug
-    ld hl, ZTO_NBYTES
-    ld d, (hl)
-    inc hl
-    ld e, (hl)
-
-    // debug
-    // display start 2 bytes
-    push de
-    ld a, d
-    call NUM2HEX
-    ld a, d
-    call OUTC
-    ld a, e
-    call OUTC
-    pop de
-
-    push de
-    ld a, e
-    call NUM2HEX
-    ld a, d
-    call OUTC
-    ld a, e
-    call OUTC
-    pop de
-
-    ld a, '\n'
-    call OUTC
-
-    ld a, '\r'
-    call OUTC
-    // end display
-
-
-    // get bytes loaded
-    //ld de, 0xfae0
+    //
+    // set the return value in hl register to
+    // the num bytes loaded from api call output
+    // memory address
+    //
     ld de, ZTO_NBYTES
     ld h, (de)
     inc de
     ld l, (de)
 
+    // restore all the other
+    // register in the stack
     pop de
     pop bc
     pop af
 
+    // ready to return
     ret
    
     #endasm
@@ -284,25 +183,32 @@ void ztgsdcard_save(char *s, int start, int len) __naked
     ld hl,2                 ; skip over return 
     add hl,sp               ; address on stack
 
+    // store all the other
+    // register in the stack
     push af
     push bc;
     push de
 
-    // get filename s*
+    // get input filename *str
+    // load it to de register
     ; LSB first (16bit)
     ld e,(hl)
     inc hl
     ld d,(hl)
 
+    // store hl (it have the next argumen address)
     push hl
 
-    // store filename in memory exchange position
-    // TODO: HARDCODED FNAME dest start address
-    //ld hl, 0xfaf4
-    //ld hl, 0xfaf6
-    //ld hl, 0xfa04
+    //
+    // store filename string in 
+    // required memory start address
+    //
+
+    // set destination address
+    // for the file name string
     ld hl, ZTI_NAME
     
+    // copy the sring from *de to *hl
     FNL:
     ld a, (de)
     or 0
@@ -322,46 +228,22 @@ void ztgsdcard_save(char *s, int start, int len) __naked
     pop hl
     inc hl
 
-    // get start var
+    // get input START start address
+    // load it to de register
     ld e,(hl)
     inc hl
     ld d,(hl)
 
-    /*
-    // debug
-    // display start 2 bytes
-    push de
-    ld a, d
-    call NUM2HEX
-    ld a, d
-    call OUTC
-    ld a, e
-    call OUTC
-    pop de
-
-    push de
-    ld a, e
-    call NUM2HEX
-    ld a, d
-    call OUTC
-    ld a, e
-    call OUTC
-    pop de
-
-    ld a, '\n'
-    call OUTC
-
-    ld a, '\r'
-    call OUTC
-    // end display
-    */
-
+    // store hl (it have the next argumen address)
     push hl
 
-    // store it
-    // TODO: HARDCODED FSTART dest start address
-    //ld hl, 0xfae0 
-    //ld hl, 0xfae2
+    //
+    // store start address START in
+    // required memory start address
+    //
+
+    // set destination address
+    // for the start address
     ld hl, ZTI_START
     ld (hl), d
     inc hl
@@ -378,63 +260,49 @@ void ztgsdcard_save(char *s, int start, int len) __naked
     inc hl
     ld d,(hl)    
 
-    /*
-    // debug
-    // display len 2 bytes
-    push de
-    ld a, d
-    call NUM2HEX
-    ld a, d
-    call OUTC
-    ld a, e
-    call OUTC
-    pop de
-
-    push de
-    ld a, e
-    call NUM2HEX
-    ld a, d
-    call OUTC
-    ld a, e
-    call OUTC
-    pop de
-
-    ld a, '\n'
-    call OUTC
-
-    ld a, '\r'
-    call OUTC
-    // end display
-    */
-
+    // store hl (is required? no need to get any more arg from stack)
     push hl
 
-    // store it
-    // TODO: HARDCODED FLEN dest start address
-    //ld hl, 0xfae2
-    //ld hl, 0xfae4
+    //
+    // store lenght (nbytes) LEN in
+    // required memory start address
+    //
+
+    // set destination address
+    // for the len address
     ld hl, ZTI_LEN
     ld (hl), d
     inc hl
     ld (hl), e
    
+    // (is required if close above push)
     pop hl
 
-    // call the save rom routine
+    // store hl (is required?)
     push hl
-    // TODO hardcoded address
+
+    // call the save routine (ROM)
     call ZTC_FSAVE
-    //call 0x2002
-    //call 0x2182
-    //call 0x8182
+
+    // (is required if close above push)
     pop hl
 
     pop de
     pop bc
     pop af
 
+    //
+    // nothing to return in hl
+    // the value it holds
+    // is non sense
+    //
+
     ret
 
+    //
+    // code not required
+    // if not debuging
+    //
 
     //
     // debug code
@@ -488,3 +356,70 @@ void ztgsdcard_save(char *s, int start, int len) __naked
 
     #endasm
 }
+
+/////////////////////////////////////////////////////
+//
+// debug snipets
+/////////////////////////////////////////////////////
+/*
+    // debug
+    push hl
+    push de
+    push bc
+    push af
+    // debug
+    // display start 2 bytes
+    push de
+    ld a, d
+    call NUM2HEX
+    ld a, d
+    call OUTC
+    ld a, e
+    call OUTC
+    pop de
+
+    push de
+    ld a, e
+    call NUM2HEX
+    ld a, d
+    call OUTC
+    ld a, e
+    call OUTC
+    pop de
+
+    ld a, '\n'
+    call OUTC
+    ld a, '\r'
+    call OUTC
+    // end display
+    
+    // debug
+    pop af
+    pop bc
+    pop de
+    pop hl
+*/
+/////////////////////////////////////////////////////
+/*
+    // debug
+    push hl
+    push de
+    push bc
+    push af
+    ld   de,ZTI_NAME
+    ld   C,0x06
+    rst  0x30
+    ld a, '\n'
+    call OUTC
+    ld a, '\r'
+    call OUTC
+    pop af
+    pop bc
+    pop de
+    pop hl
+*/
+/////////////////////////////////////////////////////
+
+/////////////////////////////////////////////////////
+
+/////////////////////////////////////////////////////
