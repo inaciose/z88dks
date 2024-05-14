@@ -27,7 +27,9 @@
 #define ZTC_FWRITE      0x2032
 #define ZTC_FREAD       0x2035
 #define ZTC_FTELL       0x2038
-
+#define ZTC_FSEEKSET    0x203b
+#define ZTC_FSEEKCUR    0x203e
+#define ZTC_FSEEKEND    0x2041
 
 #define ZTC_FREWIND     0x2044
 #define ZTC_FPEEK       0x2047
@@ -199,7 +201,7 @@ int ztgsdc_fclose(int handle) __naked
     push bc;
     push de
 
-    // get input filename *str
+    // get input handle id
     // load it to de register
     ; LSB first (16bit)
     ld e,(hl)
@@ -267,7 +269,7 @@ int ztgsdc_fwrite(int handle, int b) __naked
     push bc;
     push de
 
-    // get input filename *str
+    // get input handle id
     // load it to de register
     ; LSB first (16bit)
     ld e,(hl)
@@ -357,7 +359,7 @@ int ztgsdc_fwrite(int handle, int b) __naked
 // next 2 byte are the result address pointer (int = 16bit)
 // returns in hl: byte read LSB / or error if res != 1
 
-int ztgsdc_fread(int handle, int res) __naked
+int ztgsdc_fread(int handle, int *res) __naked
 {
 
    #asm
@@ -371,7 +373,7 @@ int ztgsdc_fread(int handle, int res) __naked
     push bc;
     push de
 
-    // get input filename *str
+    // get input handle id
     // load it to de register
     ; LSB first (16bit)
     ld e,(hl)
@@ -405,15 +407,12 @@ int ztgsdc_fread(int handle, int res) __naked
     ld e,(hl)
     inc hl
     ld d,(hl)
-        
-    //
-    // store result in
-    // required memory start address
-    //
 
-    // set start address
-    // for the source address
+    // we have the destination address
+
+    // set the source address
     ld hl, ZTO_BYTE1
+    // copy byte from src to dest address
     ld a, (hl)
     ld (de), a
 
@@ -471,7 +470,7 @@ int ztgsdc_fpeek(int handle) __naked
     push bc;
     push de
 
-    // get input filename *str
+    // get input handle id
     // load it to de register
     ; LSB first (16bit)
     ld e,(hl)
@@ -550,7 +549,7 @@ int ztgsdc_frewind(int handle) __naked
     push bc;
     push de
 
-    // get input filename *str
+    // get input handle id
     // load it to de register
     ; LSB first (16bit)
     ld e,(hl)
@@ -618,7 +617,7 @@ unsigned long int ztgsdc_ftell(int handle) __naked
     push bc;
     push de
 
-    // get input filename *str
+    // get input handle id
     // load it to de register
     ; LSB first (16bit)
     ld e,(hl)
@@ -676,6 +675,621 @@ unsigned long int ztgsdc_ftell(int handle) __naked
     #endasm
 }
 
+
+/////////////////////////////////////////////////////
+// fseekset, set position from beguin of file 
+//
+// Parameters: passed on stack
+// Returns: bytes read on hl
+//
+// arg in the stack.
+// LSB first
+// first 2 bytes allways hold the return address
+// next 2 byte are the handle (LSB byte int = 16bit)
+// next 2 byte are the pointer (address) of an long (long = 32bit)
+// returns in hl: byte read LSB / or error if res != 1
+
+int ztgsdc_fseekset(int handle, unsigned long int *pos) __naked
+{
+
+   #asm
+
+    ld hl,2                 ; skip over return 
+    add hl,sp               ; address on stack
+
+    // store all the other
+    // register in the stack
+    push af
+    push bc;
+    push de
+
+    // get input handle id
+    // load it to de register
+    ; LSB first (16bit)
+    ld e,(hl)
+    inc hl
+    ld d,(hl)
+
+    // store hl (it have the next argumen address)
+    push hl
+
+    // store value in file HDL address
+    // invert byte order LSB first
+    // because we only use a byte
+    ld hl, ZTI_HDL
+    ld (hl), e
+    inc hl
+    ld (hl), d
+
+    // restore hl
+    pop hl
+
+    // advance to LSW
+    // point to the first LSB on stack
+    inc hl
+
+    // get position address
+    // load it to de register
+    ld e,(hl)
+    inc hl
+    ld d,(hl)
+
+    // we get the LS bytes and words first
+    // store value in file ZTI_LEN address
+    ld hl, ZTI_LEN
+    // invert byte order
+    inc de
+    ld a, (de)
+    ld (hl), a
+    // 
+    inc hl
+    dec de
+    ld a, (de)
+    ld (hl), a
+    inc de
+
+
+    // debug
+    push hl
+    push de
+    push bc
+    push af
+
+    ld hl, ZTI_LEN
+    ld d,(hl)
+    inc hl
+    ld e,(hl)
+
+    // debug
+    // display start 2 bytes
+    push de
+    ld a, d
+    call NUM2HEX
+    ld a, d
+    call OUTC
+    ld a, e
+    call OUTC
+    pop de
+
+    push de
+    ld a, e
+    call NUM2HEX
+    ld a, d
+    call OUTC
+    ld a, e
+    call OUTC
+    pop de
+
+    ld a, '\n'
+    call OUTC
+    ld a, '\r'
+    call OUTC
+    // end display
+    
+    // debug
+    pop af
+    pop bc
+    pop de
+    pop hl
+    // end debug
+
+    // advance byte index
+    inc de
+ 
+    // store MSW in file START address
+    ld hl, ZTI_START
+    inc de
+    ld a, (de)
+    ld (hl), a
+    inc hl
+    dec de
+    ld a, (de)
+    ld (hl), a
+
+    // debug
+    push hl
+    push de
+    push bc
+    push af
+
+    ld hl, ZTI_START
+    ld d,(hl)
+    inc hl
+    ld e,(hl)
+
+    // debug
+    // display start 2 bytes
+    push de
+    ld a, d
+    call NUM2HEX
+    ld a, d
+    call OUTC
+    ld a, e
+    call OUTC
+    pop de
+
+    push de
+    ld a, e
+    call NUM2HEX
+    ld a, d
+    call OUTC
+    ld a, e
+    call OUTC
+    pop de
+
+    ld a, '\n'
+    call OUTC
+    ld a, '\r'
+    call OUTC
+    // end display
+    
+    // debug
+    pop af
+    pop bc
+    pop de
+    pop hl
+    // end debug
+
+    // call api function
+    call ZTC_FSEEKSET
+    
+    // set the return value in hl register to
+    // handle id or error id
+    // check error
+    ld de, ZTO_ERROR
+    ld a, (de)
+    or 0
+    //jr z, ZFSEEKSETOK
+        ld h, 0x0
+        ld l, a
+        jr ZFSEEKSETEND
+    ZFSEEKSETOK:
+        ld h, 0x0
+        ld de, ZTO_BYTE1
+        ld l, (de)
+
+    ZFSEEKSETEND:
+
+    // restore all the
+    // other registers
+    pop de
+    pop bc
+    pop af
+
+    ret
+
+    #endasm
+}
+
+/////////////////////////////////////////////////////
+// fseekcur, set position from current position in file 
+//
+// Parameters: passed on stack
+// Returns: bytes read on hl
+//
+// arg in the stack.
+// LSB first
+// first 2 bytes allways hold the return address
+// next 2 byte are the handle (LSB byte int = 16bit)
+// next 2 byte are the position, pointer (address) to an long (long = 32bit)
+// returns in hl: byte read LSB / or error if res != 1
+
+int ztgsdc_fseekcur(int handle, long int *pos) __naked
+{
+
+   #asm
+
+    ld hl,2                 ; skip over return 
+    add hl,sp               ; address on stack
+
+    // store all the other
+    // register in the stack
+    push af
+    push bc;
+    push de
+
+    // get input handle id
+    // load it to de register
+    ; LSB first (16bit)
+    ld e,(hl)
+    inc hl
+    ld d,(hl)
+
+    // store hl (it have the next argumen address)
+    push hl
+
+    // store value in file HDL address
+    // invert byte order LSB first
+    // because we only use a byte
+    ld hl, ZTI_HDL
+    ld (hl), e
+    inc hl
+    ld (hl), d
+
+    // restore hl
+    pop hl
+
+    // advance to LSW
+    // point to the first LSB on stack
+    inc hl
+
+    // get position address
+    // load it to de register
+    ld e,(hl)
+    inc hl
+    ld d,(hl)
+
+    // we get the LS bytes and words first
+    // store value in file ZTI_LEN address
+    ld hl, ZTI_LEN
+    // invert byte order
+    inc de
+    ld a, (de)
+    ld (hl), a
+    // 
+    inc hl
+    dec de
+    ld a, (de)
+    ld (hl), a
+    inc de
+
+
+    // debug
+    push hl
+    push de
+    push bc
+    push af
+
+    ld hl, ZTI_LEN
+    ld d,(hl)
+    inc hl
+    ld e,(hl)
+
+    // debug
+    // display start 2 bytes
+    push de
+    ld a, d
+    call NUM2HEX
+    ld a, d
+    call OUTC
+    ld a, e
+    call OUTC
+    pop de
+
+    push de
+    ld a, e
+    call NUM2HEX
+    ld a, d
+    call OUTC
+    ld a, e
+    call OUTC
+    pop de
+
+    ld a, '\n'
+    call OUTC
+    ld a, '\r'
+    call OUTC
+    // end display
+    
+    // debug
+    pop af
+    pop bc
+    pop de
+    pop hl
+    // end debug
+
+    // advance byte index
+    inc de
+ 
+    // store MSW in file START address
+    ld hl, ZTI_START
+    inc de
+    ld a, (de)
+    ld (hl), a
+    inc hl
+    dec de
+    ld a, (de)
+    ld (hl), a
+
+    // debug
+    push hl
+    push de
+    push bc
+    push af
+
+    ld hl, ZTI_START
+    ld d,(hl)
+    inc hl
+    ld e,(hl)
+
+    // debug
+    // display start 2 bytes
+    push de
+    ld a, d
+    call NUM2HEX
+    ld a, d
+    call OUTC
+    ld a, e
+    call OUTC
+    pop de
+
+    push de
+    ld a, e
+    call NUM2HEX
+    ld a, d
+    call OUTC
+    ld a, e
+    call OUTC
+    pop de
+
+    ld a, '\n'
+    call OUTC
+    ld a, '\r'
+    call OUTC
+    // end display
+    
+    // debug
+    pop af
+    pop bc
+    pop de
+    pop hl
+    // end debug
+
+    // call api function
+    call ZTC_FSEEKCUR
+    
+    // set the return value in hl register to
+    // handle id or error id
+    // check error
+    ld de, ZTO_ERROR
+    ld a, (de)
+    or 0
+    //jr z, ZFSEEKCUROK
+        ld h, 0x0
+        ld l, a
+        jr ZFSEEKCUREND
+    ZFSEEKCUROK:
+        ld h, 0x0
+        ld de, ZTO_BYTE1
+        ld l, (de)
+
+    ZFSEEKCUREND:
+
+    // restore all the
+    // other registers
+    pop de
+    pop bc
+    pop af
+
+    ret
+
+    #endasm
+}
+
+/////////////////////////////////////////////////////
+// fseekend, set position from the end of the file 
+//
+// Parameters: passed on stack
+// Returns: bytes read on hl
+//
+// arg in the stack.
+// LSB first
+// first 2 bytes allways hold the return address
+// next 2 byte are the handle (LSB byte int = 16bit)
+// next 2 byte are the position, pointer (address) to an long (long = 32bit)
+// returns in hl: byte read LSB / or error if res != 1
+
+int ztgsdc_fseekend(int handle, long int *pos) __naked
+{
+
+   #asm
+
+    ld hl,2                 ; skip over return 
+    add hl,sp               ; address on stack
+
+    // store all the other
+    // register in the stack
+    push af
+    push bc;
+    push de
+
+    // get input handle id
+    // load it to de register
+    ; LSB first (16bit)
+    ld e,(hl)
+    inc hl
+    ld d,(hl)
+
+    // store hl (it have the next argumen address)
+    push hl
+
+    // store value in file HDL address
+    // invert byte order LSB first
+    // because we only use a byte
+    ld hl, ZTI_HDL
+    ld (hl), e
+    inc hl
+    ld (hl), d
+
+    // restore hl
+    pop hl
+
+    // advance to LSW
+    // point to the first LSB on stack
+    inc hl
+
+    // get position address
+    // load it to de register
+    ld e,(hl)
+    inc hl
+    ld d,(hl)
+
+    // we get the LS bytes and words first
+    // store value in file ZTI_LEN address
+    ld hl, ZTI_LEN
+    // invert byte order
+    inc de
+    ld a, (de)
+    ld (hl), a
+    // 
+    inc hl
+    dec de
+    ld a, (de)
+    ld (hl), a
+    inc de
+
+
+    // debug
+    push hl
+    push de
+    push bc
+    push af
+
+    ld hl, ZTI_LEN
+    ld d,(hl)
+    inc hl
+    ld e,(hl)
+
+    // debug
+    // display start 2 bytes
+    push de
+    ld a, d
+    call NUM2HEX
+    ld a, d
+    call OUTC
+    ld a, e
+    call OUTC
+    pop de
+
+    push de
+    ld a, e
+    call NUM2HEX
+    ld a, d
+    call OUTC
+    ld a, e
+    call OUTC
+    pop de
+
+    ld a, '\n'
+    call OUTC
+    ld a, '\r'
+    call OUTC
+    // end display
+    
+    // debug
+    pop af
+    pop bc
+    pop de
+    pop hl
+    // end debug
+
+    // advance byte index
+    inc de
+ 
+    // store MSW in file START address
+    ld hl, ZTI_START
+    inc de
+    ld a, (de)
+    ld (hl), a
+    inc hl
+    dec de
+    ld a, (de)
+    ld (hl), a
+
+    // debug
+    push hl
+    push de
+    push bc
+    push af
+
+    ld hl, ZTI_START
+    ld d,(hl)
+    inc hl
+    ld e,(hl)
+
+    // debug
+    // display start 2 bytes
+    push de
+    ld a, d
+    call NUM2HEX
+    ld a, d
+    call OUTC
+    ld a, e
+    call OUTC
+    pop de
+
+    push de
+    ld a, e
+    call NUM2HEX
+    ld a, d
+    call OUTC
+    ld a, e
+    call OUTC
+    pop de
+
+    ld a, '\n'
+    call OUTC
+    ld a, '\r'
+    call OUTC
+    // end display
+    
+    // debug
+    pop af
+    pop bc
+    pop de
+    pop hl
+    // end debug
+
+    // call api function
+    call ZTC_FSEEKEND
+    
+    // set the return value in hl register to
+    // handle id or error id
+    // check error
+    ld de, ZTO_ERROR
+    ld a, (de)
+    or 0
+    //jr z, ZFSEEKENDOK
+        ld h, 0x0
+        ld l, a
+        jr ZFSEEKENDEND
+    ZFSEEKENDOK:
+        ld h, 0x0
+        ld de, ZTO_BYTE1
+        ld l, (de)
+
+    ZFSEEKENDEND:
+
+    // restore all the
+    // other registers
+    pop de
+    pop bc
+    pop af
+
+    ret
+
+    #endasm
+}
 
 
 

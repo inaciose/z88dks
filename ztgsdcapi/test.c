@@ -3,6 +3,7 @@
 //
 // v0.01  - fexist, mkdir, rmdir, cd, cwd
 //          fopen, fclose, fwrite, fread, ftell, frewind & fpeek
+// v0.02  - seekset, seekcur, seekend
 
 #include <stdio.h>
 
@@ -24,11 +25,15 @@ extern int ztgsdc_fopen(char *s, int mode);
 extern int ztgsdc_fclose(int handle);
 
 extern int ztgsdc_fwrite(int handle, int b);
-extern int ztgsdc_fread(int handle, int res);
+extern int ztgsdc_fread(int handle, int *res);
 extern unsigned long int ztgsdc_ftell(int handle);
 
 extern int ztgsdc_frewind(int handle);
 extern int ztgsdc_fpeek(int handle);
+
+extern int ztgsdc_fseekset(int handle, unsigned long int *pos);
+extern int ztgsdc_fseekcur(int handle, long int *pos);
+extern int ztgsdc_fseekend(int handle, long int *pos);
 
 int t_fexist(void);
 int t_mkdir(void);
@@ -41,20 +46,18 @@ int t_fclose(int handle);
 
 int t_fwrite(int hdl, char b);
 int t_fread(int hdl);
+
 int t_ftell(int hdl);
+int t_fseekset(int hdl, unsigned long int pos);
+int t_fseekcur(int hdl, long int pos);
+int t_fseekend(int hdl, long int pos);
 
 int t_frewind(int hdl);
 int t_fpeek(int hdl);
 
 int main(void) {
 
-    unsigned char sitmp;
     int itmp;
-    unsigned long litmp;
-
-    printf("sizeof short int: %d\n", sizeof(sitmp));
-    printf("sizeof int: %d\n", sizeof(itmp));
-    printf("sizeof long int: %d\n", sizeof(litmp));
 
 /*
     //
@@ -200,6 +203,27 @@ int main(void) {
     itmp = t_fread(fhdl);
     t_ftell(fhdl);
 
+    t_fseekset(fhdl, 1);
+    t_ftell(fhdl);
+
+    t_fseekset(fhdl, 3);
+    t_ftell(fhdl);
+
+    t_fseekcur(fhdl, -3);
+    t_ftell(fhdl);
+
+    t_fseekcur(fhdl, 5);
+    t_ftell(fhdl);
+
+    itmp = t_fpeek(fhdl);
+    t_ftell(fhdl);
+
+    t_fseekend(fhdl, -3);
+    t_ftell(fhdl);
+
+    t_fseekend(fhdl, -4);
+    t_ftell(fhdl);
+
     // close file
     if(fhdl) {
         // close the file
@@ -308,6 +332,67 @@ int t_ftell(int hdl) {
 
     return itmp;
 }
+
+int t_fseekset(int hdl, unsigned long int pos) {
+
+    int itmp;
+    //unsigned long int pos = 0xDEADBEEFLU;
+    //unsigned long int pos = 0x1;
+    printf("%lx\n", pos);
+
+    // we receive the file hdl id
+    // as value (LSB)
+    printf("t_fseekset input: %x\n", hdl); 
+
+    // close the file
+    itmp = ztgsdc_fseekset(hdl, &pos);
+
+    // print
+    printf("t_fseekset: %x\n", (unsigned char) itmp);
+
+    return itmp;
+}
+
+int t_fseekcur(int hdl, long int pos) {
+
+    int itmp;
+    //long int pos = 0xDEADBEEFLU;
+    //long int pos = 0x1;
+    printf("%lx\n", pos);
+
+    // we receive the file hdl id
+    // as value (LSB)
+    printf("t_fseekcur input: %x\n", hdl); 
+
+    // close the file
+    itmp = ztgsdc_fseekcur(hdl, &pos);
+
+    // print
+    printf("t_fseekcur: %x\n", (unsigned char) itmp);
+
+    return itmp;
+}
+
+int t_fseekend(int hdl, long int pos) {
+
+    int itmp;
+    //long int pos = 0xDEADBEEFLU;
+    //long int pos = 0x1;
+    printf("%lx\n", pos);
+
+    // we receive the file hdl id
+    // as value (LSB)
+    printf("t_fseekend input: %x\n", hdl); 
+
+    // call
+    itmp = ztgsdc_fseekend(hdl, &pos);
+
+    // print
+    printf("t_fseekend: %x\n", (unsigned char) itmp);
+
+    return itmp;
+}
+
 
 int t_frewind(int hdl) {
 

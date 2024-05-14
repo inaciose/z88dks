@@ -12,4 +12,5 @@ Initial API test version using:
 Should rewrite all to pass address to get ERROR_CODE alone?
 
 // v0.01  - fexist, mkdir, rmdir, cd, cwd
-//          fopen, fclose, fwrite, fread, ftell, frewind & fpeek
+//          fopen, fclose, fwrite, fread, ftell, frewind & fpeek  
+// v0.02  - seekset, seekcur, seekend
