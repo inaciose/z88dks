@@ -3,3 +3,4 @@ all:
 
 clean:
 	rm -f *.c.lis test_DATA.bin test_BSS.bin test_CODE.bin test.map test.bin test.o test.lis test.ihx
+	

@@ -40,5 +40,7 @@ extern int ztgsdc_reset(void);
 extern void ztgsdc_fsave(char *s, int start, int len);
 extern int ztgsdc_fload(char *s, int start);
 
+extern unsigned long int ztgsdc_fdspace(void);
+extern unsigned long int ztgsdc_tdspace(void);
 
 #endif

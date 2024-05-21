@@ -1,8 +1,16 @@
 #include <stdio.h>
-/////////////////////////////////////////////////////
 //
-// ZTGSDC file system calls api
 //
+// ztgsdcAPI system calls api
+//
+//
+// v0.01  - fexist, mkdir, rmdir, cd, cwd
+//          fopen, fclose, fwrite, fread, ftell, frewind & fpeek
+// v0.02  - seekset, seekcur, seekend
+// v0.03  - all operations on the ztg rom v1.06p
+// v0.04  - ztgsdc_fdspace & ztgsdc_tdspace ztg rom v1.07a
+//
+
 /////////////////////////////////////////////////////
 //
 // Define ztgsdc api calls addresses
@@ -32,14 +40,16 @@
 #define ZTC_FSEEKEND    0x2041
 #define ZTC_FREWIND     0x2044
 #define ZTC_FPEEK       0x2047
-
 #define ZTC_FWRITEB     0x204a
 #define ZTC_FREADB      0x204d
-
 #define ZTC_FTRUNCATE   0x2050
 #define ZTC_LSOF        0x2053
 #define ZTC_FGETSIZE    0x2056
 #define ZTC_FGETNAME    0x2059
+#define ZTC_FGETSIZE    0x2056
+#define ZTC_FGETNAME    0x2059
+#define ZTC_FDSPACE     0x205C
+#define ZTC_TDSPACE     0x205F
 
 /////////////////////////////////////////////////////
 //
@@ -2081,7 +2091,7 @@ int ztgsdc_ftruncate(int handle, unsigned long int *pos) __naked
 // fgetsize, get size of file 
 //
 // Parameters: passed on stack
-// Returns: bytes read on hl
+// Returns: filesize in dehl
 //
 // arg in the stack.
 // LSB first
@@ -3441,6 +3451,130 @@ int ztgsdc_clist(char *s) __naked
     // restore all the
     // other registers
     pop de
+    pop bc
+    pop af
+
+    ret
+
+    #endasm
+}
+
+
+/////////////////////////////////////////////////////
+// fdspace, get free space in sd card (MBytes)
+//
+// Parameters: none
+// Returns: freespace in dehl
+//
+// arg in the stack.
+// LSB first
+// first 2 bytes allways hold the return address
+// returns in dehl
+
+unsigned long int ztgsdc_fdspace(void) __naked
+{
+
+   #asm
+
+    // dont need to get args from stake
+    // we will use de & hl to return value
+
+    // store all the other
+    // register in the stack
+    push af
+    push bc;
+
+    // call api function
+    call ZTC_FDSPACE
+    
+    // get result
+    ld hl, ZTO_LONG
+    ld d, (hl)
+    inc hl
+    ld e, (hl)   
+
+    push de
+
+    inc hl
+    ld d, h
+    ld e, l
+
+    ld h, (de)
+    inc de
+    ld l, (de)
+
+    pop de
+
+    // return value is in dehl
+
+    // dont check error
+    // ld de, ZTO_ERROR
+
+    // restore all the
+    // other registers
+    //pop de
+    pop bc
+    pop af
+
+    ret
+
+    #endasm
+}
+
+
+/////////////////////////////////////////////////////
+// tdspace, get total space in sd card (MBytes)
+//
+// Parameters: none
+// Returns: freespace in dehl
+//
+// arg in the stack.
+// LSB first
+// first 2 bytes allways hold the return address
+// returns in dehl
+
+unsigned long int ztgsdc_tdspace(void) __naked
+{
+
+   #asm
+
+    // dont need to get args from stake
+    // we will use de & hl to return value
+
+    // store all the other
+    // register in the stack
+    push af
+    push bc;
+
+    // call api function
+    call ZTC_TDSPACE
+    
+    // get result
+    ld hl, ZTO_LONG
+    ld d, (hl)
+    inc hl
+    ld e, (hl)   
+
+    push de
+
+    inc hl
+    ld d, h
+    ld e, l
+
+    ld h, (de)
+    inc de
+    ld l, (de)
+
+    pop de
+
+    // return value is in dehl
+
+    // dont check error
+    // ld de, ZTO_ERROR
+
+    // restore all the
+    // other registers
+    //pop de
     pop bc
     pop af
 

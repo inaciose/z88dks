@@ -1,10 +1,13 @@
 //
-// ZTGSDC file system calls api
+//
+// ztgsdcAPI system calls api test program
+//
 //
 // v0.01  - fexist, mkdir, rmdir, cd, cwd
 //          fopen, fclose, fwrite, fread, ftell, frewind & fpeek
 // v0.02  - seekset, seekcur, seekend
-// v0.03  - all operations on the ztg rom v1.06p 
+// v0.03  - all operations on the ztg rom v1.06p
+// v0.04  - ztgsdc_fdspace & ztgsdc_tdspace ztg rom v1.07a
 
 #include <stdio.h>
 
@@ -55,6 +58,9 @@ int t_reset(void);
 
 int t_fload(char *name);
 int t_fsave(char *name);
+
+int t_fdspace(void);
+int t_tdspace(void);
 
 int main(void) {
 
@@ -139,7 +145,6 @@ int main(void) {
     //
     // fopen & fclose tests
     //
-
 
     //check if exists
     itmp = t_fexist("wbytes");
@@ -365,6 +370,12 @@ int main(void) {
 
     // save file
     t_fsave("sbytes");
+
+    // get free space
+    t_fdspace();
+
+    // get total space
+    t_tdspace();
 
     return 0;
 
@@ -933,4 +944,31 @@ int t_fsave(char *name) {
     printf("t_fsave done\n");
 
     return 0;
+}
+
+
+int t_fdspace(void) {
+
+    unsigned long itmp;
+
+    // call api
+    itmp = ztgsdc_fdspace();
+
+    // print
+    printf("t_fdspace: %lx\n", itmp);
+
+    return itmp;
+}
+
+int t_tdspace(void) {
+
+    unsigned long itmp;
+
+    // call api
+    itmp = ztgsdc_tdspace();
+
+    // print
+    printf("t_tdspace: %lx\n", itmp);
+
+    return itmp;
 }
